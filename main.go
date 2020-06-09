@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"log"
-	"math"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -49,6 +48,13 @@ type Search struct {
 	Results    Results
 }
 
+func (s *Search) GoToNext() int {
+	return s.NextPage + 1
+}
+
+func (s *Search) PreviousPage() int {
+	return s.NextPage - 1
+}
 func indexHandler(w http.ResponseWriter, req *http.Request) {
 	tpl.Execute(w, nil)
 }
@@ -76,7 +82,13 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unexpected server error", http.StatusInternalServerError)
 		return
 	}
-
+	if searchKey == "" {
+		err = tpl.Execute(w, search)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	}
 	search.NextPage = next
 	pageSize := 20
 
@@ -101,12 +113,16 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	search.TotalPages = search.Results.TotalResults / pageSize
+	if search.Results.TotalResults%pageSize != 0 {
+		search.TotalPages++
+	}
 
-	search.TotalPages = int(math.Ceil(float64(search.Results.TotalResults / pageSize)))
 	err = tpl.Execute(w, search)
 	if err != nil {
 		log.Println(err)
 	}
+
 }
 
 func main() {

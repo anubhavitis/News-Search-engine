@@ -5,38 +5,58 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>News App Demo</title>
+        <title>News Search Engine</title>
         <link rel="stylesheet" href="/css/style.css">
     </head>
     <body>
         <main>
             <header>
-                <a class="logo" href="/">News Demo</a>
+                <a href="https://twitter.com/anubhavitis" class="button github-button" target="_blank">Anubhav Singhal</a>
                 <form action="/search" method="GET">
                     <input autofocus class="search-input" value="{{ .SearchKey }}" 
                         placeholder="Enter a news topic" type="search" name="q">
                 </form>
-                <a href="https://github.com/freshman-tech/news" 
-                    class="button github-button">View on Github</a>
+                <a href="https://github.com/zeddie07/News-Search-engine" 
+                    class="button github-button" target="_blank">View on Github</a>
             </header>
+
             <section class="container">
+                
                 <ul class="search-results">
+                    <div class="result-count">
+                        {{if (eq .SearchKey "") }}
+                            <p> Seach Key not found! <strong> TRY AGAIN! </strong></p>
+                        {{ else if gt .Results.TotalResults 0 }}
+                            <p> Total <strong> {{.Results.TotalResults}} </strong> are found!
+                            <br> This is <strong> Page {{ .NextPage }}</strong> of <strong> {{ .TotalPages}} Pages.</p>
+                        {{ else if (eq .Results.TotalResults 0) }}
+                            <p> Sorry, No result Found for <strong> {{.SearchKey}} </strong></p>
+                        {{end}}
+                    </div>
                     {{ range .Results.Articles }}
                     <li class="news-article">
                         <div>
                         <a target="_blank" rel="noreferrer noopener" href="{{.URL}}">
-                            <h3 class="title">{{.Title }}</h3>
+                            <h3 class="title">{{ .Title }}</h3>
                         </a>
-                        <p class="description">{{ .Description }}</p>
+                        <p class="description"> {{ .Description }} </p>
                         <div class="metadata">
-                            <p class="source">{{ .Source.Name }}</p>
-                            <time class="published-date">{{ .FormatPublishedDate }}</time>
+                            <p class="source"> {{ .Source.Name }} </p>
+                            <time class="published-date"> {{ .FormatPublishedDate }} </time>
                         </div>
                         </div>
                         <img class="article-image" src="{{ .URLToImage }}">
                     </li>
                     {{ end }}
                 </ul>
+                <div class="pagination">
+                    {{ if (gt .NextPage 1) }}
+                        <a href="/search?q={{ .SearchKey }}&page={{ .PreviousPage }}" class="button previous-page">Previous</a>
+                    {{ end }}
+                    {{ if (lt .NextPage .TotalPages) }}
+                        <a href="/search?q={{ .SearchKey }}&page={{ .GoToNext }}" class="button next-page">Next</a>
+                    {{ end }}
+                </div>
             </section>
         </main>
     </body>
