@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"time"
 )
@@ -132,5 +133,6 @@ func main() {
 	mux.Handle("/css/", http.StripPrefix("/css/", assets))
 	mux.HandleFunc("/search", searchHandler)
 	mux.HandleFunc("/", indexHandler)
-	http.ListenAndServe(":8080", mux)
+	port := os.Getenv("PORT")
+	http.ListenAndServe(":"+port, mux)
 }
